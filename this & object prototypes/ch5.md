@@ -98,6 +98,27 @@ As we just hinted, shadowing `foo` on `myObject` is not as simple as it may seem
 2. If a `foo` is found higher on the `[[Prototype]]` chain, but it's marked as **read-only (`writable:false`)**, then both the setting of that existing property as well as the creation of the shadowed property on `myObject` **are disallowed**. If the code is running in `strict mode`, an error will be thrown. Otherwise, the setting of the property value will silently be ignored. Either way, **no shadowing occurs**.
 3. If a `foo` is found higher on the `[[Prototype]]` chain and it's a setter (see Chapter 3), then the setter will always be called. No `foo` will be added to (aka, shadowed on) `myObject`, nor will the `foo` setter be redefined.
 
+>> Hi,I have a question, for the above thrid rule,  I tried in my code, I found set value through setter by lower-chain object, the foo value can only be accessed lower-chain object, is it due to this keyword is implicit bind with prototypechainObj, or I misunderstood this rule? thank you 
+
+
+```javascript
+var obj = {
+    set foo(val){
+        this._a_ = val;   //if use this.foo = val, will cause loop invoking set
+    },
+    get foo(){
+        return this._a_;
+    }
+}
+
+var prototypechainObj = Object.create(obj);
+prototypechainObj.foo = 1
+console.log(prototypechainObj.foo)
+console.log(obj.foo)
+
+```
+
+
 Most developers assume that assignment of a property (`[[Put]]`) will always result in shadowing if the property already exists higher on the `[[Prototype]]` chain, but as you can see, that's only true in one (#1) of the three situations just described.
 
 If you want to shadow `foo` in cases #2 and #3, you cannot use `=` assignment, but must instead use `Object.defineProperty(..)` (see Chapter 3) to add `foo` to `myObject`.
